@@ -1,0 +1,15 @@
+elk:
+    build: .
+    ports:
+        - "8007:80"
+        - "8008:9200"
+        - "9003:9003"
+    volumes:
+        - /home/armel/workspace/docker-elk/etc/logstash:/etc/logstash
+    volumes_from:
+        - dataelk
+
+dataelk:
+    image: busybox
+    volumes:
+        - /data

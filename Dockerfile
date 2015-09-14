@@ -13,11 +13,16 @@ RUN \
     if ! grep "logstash" /etc/apt/sources.list; then echo "deb http://packages.elasticsearch.org/logstash/1.5/debian stable main" >> /etc/apt/sources.list;fi && \
     apt-get update
 
+
 RUN \
     apt-get install --no-install-recommends -y elasticsearch && \
     apt-get clean && \
     sed -i '/#cluster.name:.*/a cluster.name: logstash' /etc/elasticsearch/elasticsearch.yml && \
     sed -i '/#path.data: \/path\/to\/data/a path.data: /data' /etc/elasticsearch/elasticsearch.yml
+
+# Plugin HEAD pour ES
+RUN /usr/share/elasticsearch/bin/plugin --install mobz/elasticsearch-head
+    
 
 ADD etc/supervisor/conf.d/elasticsearch.conf /etc/supervisor/conf.d/elasticsearch.conf
 
@@ -38,7 +43,16 @@ RUN \
 
 ADD etc/supervisor/conf.d/kibana.conf /etc/supervisor/conf.d/kibana.conf
 
+# pour avoir netstat&co
+RUN apt-get install -y net-tools
+
 EXPOSE 80
+
+# Pour monitoring ES via head sur :9200/_plugin/head
+EXPOSE 9200
+
+# logstash listening on port 9003
+EXPOSE 9003
 
 ENV PATH /opt/logstash/bin:$PATH
 
